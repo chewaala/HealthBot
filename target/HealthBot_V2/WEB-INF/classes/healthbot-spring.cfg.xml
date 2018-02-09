@@ -1,0 +1,81 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+	http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+	<!-- create connection pool -->
+	<bean class="org.apache.commons.dbcp.BasicDataSource" id="dataSource">
+
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		<property name="url" value="jdbc:mysql://localhost:3306/healthbot" />
+		<property name="username" value="root" />
+		<property name="password" value="root" />
+
+		<property name="maxActive" value="15" />
+		<property name="minIdle" value="5" />
+		<property name="maxWait" value="5000" />
+
+	</bean>
+
+	<!-- Inject connection pool bean into session facotry, that is org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean 
+		class -->
+	<bean
+		class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean"
+		id="sessionFactory">
+		<property name="dataSource" ref="dataSource" />
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+				<prop key="hibernate.hbm2ddl.auto">update</prop>
+			</props>
+		</property>
+		<property name="annotatedClasses">
+			<list>
+				<value>com.heathbot.beans.TblAnswers</value>
+				<value>com.heathbot.beans.TblModules</value>
+				<value>com.heathbot.beans.TblQuestion</value>
+				<value>com.heathbot.beans.TblSection</value>
+				<value>com.heathbot.beans.TblSectionType</value>
+				<value>com.heathbot.beans.TblStudy</value>
+				<value>com.heathbot.beans.TblUserModules</value>
+				<value>com.heathbot.beans.TblUserModuleSurvey</value>
+				<value>com.heathbot.beans.TblUsers</value>
+				<value>com.heathbot.beans.TblUserType</value>
+			</list>
+		</property>
+	</bean>
+
+
+	<!-- Create Hibernate Template bean, and inject session factory bean into 
+		HT -->
+	<bean class="org.springframework.orm.hibernate3.HibernateTemplate" id="hibernateTemplate">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+	
+	<!-- Study Section -->
+	<bean class="com.heathbot.study.dao.StudyDao" id="studyDao">
+		<property name="hibernateTemplate" ref="hibernateTemplate" />
+	</bean>
+	
+	<bean class="com.heathbot.study.business.StudyBusiness" id="studyBusiness">
+		<property name="studyDao" ref="studyDao" />
+	</bean>
+	
+	<!-- User Section -->
+	<bean class="com.heathbot.user.dao.UserDao" id="userDao">
+		<property name="hibernateTemplate" ref="hibernateTemplate" />
+	</bean>
+	
+	<bean class="com.heathbot.user.business.UserBusiness" id="userBusiness">
+		<property name="userDao" ref="userDao" />
+	</bean>
+	
+	<!-- User type Section -->
+	<bean class="com.heathbot.usertype.dao.UserTypeDAO" id="userTypeDAO">
+		<property name="hibernateTemplate" ref="hibernateTemplate" />
+	</bean>
+	
+	<bean class="com.heathbot.usertype.business.UserTypeBusiness" id="userTypeBusiness">
+		<property name="userTypeDAO" ref="userTypeDAO" />
+	</bean>
+	
+</beans>
